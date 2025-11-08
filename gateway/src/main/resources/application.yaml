@@ -1,0 +1,35 @@
+server:
+  port: 8080
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: identity
+          uri: http://identity-service:8081
+          predicates: [ Path=/identity/** ]
+          filters: [ StripPrefix=1 ]
+        - id: registry
+          uri: http://registry-service:8082
+          predicates: [ Path=/registry/** ]
+          filters: [ StripPrefix=1 ]
+        - id: lot
+          uri: http://lot-service:8083
+          predicates: [ Path=/lot/** ]
+          filters: [ StripPrefix=1 ]
+        - id: transfer
+          uri: http://transfer-service:8084
+          predicates: [ Path=/transfer/** ]
+          filters: [ StripPrefix=1 ]
+        - id: audit
+          uri: http://audit-service:8085
+          predicates: [ Path=/audit/** ]
+          filters: [ StripPrefix=1 ]
+        - id: consumer
+          uri: http://consumer-api:8086
+          predicates: [ Path=/consumer/** ]
+          filters: [ StripPrefix=1 ]
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
