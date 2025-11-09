@@ -1,78 +1,79 @@
-version: "3.8"
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: wildtrace
-    ports: [ "5432:5432" ]
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.3
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-    ports: [ "2181:2181" ]
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.3
-    depends_on: [ zookeeper ]
-    environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports: [ "29092:29092" ]
-
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports: [ "9090:9090" ]
-
-  grafana:
-    image: grafana/grafana:latest
-    ports: [ "3000:3000" ]
+  build-stage:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.build
 
   gateway:
-    build: ../gateway
-    depends_on: [ identity-service ]
-    ports: [ "8080:8080" ]
+    build:
+      context: ..
+      dockerfile: gateway/Dockerfile
+    depends_on:
+      - build-stage
+    ports:
+      - "8080:8080"
 
   identity-service:
-    build: ../identity-service
-    ports: [ "8081:8081" ]
+    build:
+      context: ..
+      dockerfile: identity-service/Dockerfile
+    depends_on:
+      - build-stage
 
   registry-service:
-    build: ../registry-service
-    ports: [ "8082:8082" ]
+    build:
+      context: ..
+      dockerfile: registry-service/Dockerfile
+    depends_on:
+      - build-stage
 
   lot-service:
-    build: ../lot-service
-    ports: [ "8083:8083" ]
+    build:
+      context: ..
+      dockerfile: lot-service/Dockerfile
+    depends_on:
+      - build-stage
 
   transfer-service:
-    build: ../transfer-service
-    ports: [ "8084:8084" ]
+    build:
+      context: ..
+      dockerfile: transfer-service/Dockerfile
+    depends_on:
+      - build-stage
 
   audit-service:
-    build: ../audit-service
-    ports: [ "8085:8085" ]
+    build:
+      context: ..
+      dockerfile: audit-service/Dockerfile
+    depends_on:
+      - build-stage
 
   consumer-api:
-    build: ../consumer-api
-    ports: [ "8086:8086" ]
+    build:
+      context: ..
+      dockerfile: consumer-api/Dockerfile
+    depends_on:
+      - build-stage
 
   legacy-adapter:
-    build: ../legacy-adapter
-    ports: [ "8087:8087" ]
+    build:
+      context: ..
+      dockerfile: legacy-adapter/Dockerfile
+    depends_on:
+      - build-stage
 
   analytics-service:
-    build: ../analytics-service
-    ports: [ "8088:8088" ]
+    build:
+      context: ..
+      dockerfile: analytics-service/Dockerfile
+    depends_on:
+      - build-stage
 
   frontend:
-    build: ../frontend
-    ports: [ "5173:5173" ]
-    command: ["npm","run","dev","--","--host"]
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+
