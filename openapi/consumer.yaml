@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info: { title: Consumer Trace API, version: 0.1.0 }
+servers: [ { url: /consumer } ]
+paths:
+  /trace/{lotId}:
+    get:
+      parameters: [ { in: path, name: lotId, required: true, schema: { type: string } } ]
+      responses:
+        '200':
+          description: Trace Data Returned
+          content: { application/json: { schema: { $ref: '#/components/schemas/Trace' }}}
+components:
+  schemas:
+    Trace:
+      type: object
+      required: [lot, chain]
+      properties:
+        lotId: { type: string}
+        species: { type: string}
+        origin: { type: object, properties: {region: {type: string}, gps: {type: array, items: {type: numbers}}}
+        weightKg: {type: numbers}
+        certifications: {type: array, items: { type: string}}
+        transfers: 
+          type: array, 
+          items: 
+            type: object, 
+            properties: 
+              step: {type, string}
+              fromActor: {type: string}
+              toActor: {type: string} 
+              whenAt: {type: string, format: date-time}
+              docUri: {type: string}
+

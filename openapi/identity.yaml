@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info: { title: Identity API, version: 0.1.0 }
+servers: [ { url: /identity } ]
+paths:
+  /auth/login:
+    post:
+      summary: Exchange username/password for JWT access token (keyclock proxy)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Login' }}}}
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Jwt' }}}}, '401':{ description: Invalid credentials}}
+  /auth/me:
+    get:
+      summary: Get actor profile for current authenticated user
+      security: 
+        - bearerAuth: []
+      responses: {'200': {description: Actor profile returned, content: {application/json: {schema: {$ref: '#/components/schemas/ActorProfile'}}}}}
+  /auth/actors/{actorId}:
+    get:
+      summary: Get actor profile by actorId
+      secirity:
+        - bearerAuth: []
+      parameters:
+        - name: actorId
+          in: path
+          required: true
+          schema: { type: string}
+      responses: { '200': {description: Actor profile returned, content: {application/json: {schema: {$ref: '#/components/schemas/ActorProfile'}}}}, '404': { description: Actor Not Found}}
+
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  schemas:
+    Login: { type: object, required: [username,password], properties: { username: { type: string }, password: { type: string } } }
+    Jwt: { type: object, required: [token,expiresAt], properties: { token: { type: string }, expiresAt: { type: string, format: date-time } } }
+    ActorProfile: { type: object, properties: { userId: {type: string}, actorId: {type: string}, orgId: {type: string}, roles: {type: array, items: {type: string}}} }

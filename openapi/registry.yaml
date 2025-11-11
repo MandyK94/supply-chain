@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info: { title: Registry API, version: 0.2.0 }
+servers: [ { url: /registry } ]
+paths:
+  /actors:
+    get:
+      summary: List actors
+      parameters:
+        - in: query; name: type; schema: { type: string, enum: [HARVESTER,FPO,PROCESSOR,WAREHOUSE,EXPORTER,RETAILER] }
+        - in: query; name: region; schema: { type: string }
+        - in: query; name: page; schema: { type: integer, minimum: 0, default: 0 }
+        - in: query; name: size; schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ActorPage' }}}}}
+    post:
+      summary: Create actor
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ActorCreate' }}}}
+      responses: { '201': { description: Created, headers: { Location: { schema: { type: string }}}} }
+  /actors/{id}:
+    get:
+      parameters: [ { in: path, name: id, required: true, schema: { type: string, format: uuid } } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Actor' }}}}
+        '404': { description: Not Found }
+components:
+  schemas:
+    Actor:
+      type: object
+      required: [id,name,type]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        type: { type: string, enum: [HARVESTER,FPO,PROCESSOR,WAREHOUSE,EXPORTER,RETAILER] }
+        region: { type: string }
+    ActorCreate:
+      type: object
+      required: [name,type]
+      properties:
+        name: { type: string }
+        type: { $ref: '#/components/schemas/Actor/properties/type' }
+        region: { type: string }
+    ActorPage:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Actor' } }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }

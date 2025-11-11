@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info: { title: Lot API, version: 0.2.0 }
+servers: [ { url: /lot } ]
+paths:
+  /lots:
+    get:
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/LotPage' }}}}}
+    post:
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LotCreate' }}}}
+      responses: { '201': { description: Created } }
+components:
+  schemas:
+    Lot:
+      type: object
+      required: [id,productId,sourceActorId,harvestedAt,quantity,unit,status]
+      properties:
+        id: { type: string, format: uuid }
+        productId: { type: string, format: uuid }
+        sourceActorId: { type: string, format: uuid }
+        harvestedAt: { type: string, format: date-time }
+        quantity: { type: number, minimum: 0 }
+        unit: { type: string, enum: [KG,G,L] }
+        status: { type: string, enum: [CREATED,AVAILABLE,IN_TRANSFER,CONSUMED] }
+    LotCreate:
+      type: object
+      required: [productId,sourceActorId,harvestedAt,quantity,unit]
+      properties:
+        productId: { type: string, format: uuid }
+        sourceActorId: { type: string, format: uuid }
+        harvestedAt: { type: string, format: date-time }
+        quantity: { type: number, minimum: 0 }
+        unit: { $ref: '#/components/schemas/Lot/properties/unit' }
+    LotPage:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Lot' } }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }

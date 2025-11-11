@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info: { title: Transfer API, version: 0.2.0 }
+servers: [ { url: /transfer } ]
+paths:
+  /transfers:
+    post:
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/TransferCreate' }}}}
+      responses: { '201': { description: Created } }
+    get:
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TransferPage' }}}}}
+  /transfers/{id}/ship:
+    post:
+      parameters: [ { in: path, name: id, required: true, schema: { type: string, format: uuid } } ]
+      responses: { '200': { description: Shipped } }
+  /transfers/{id}/receive:
+    post:
+      parameters: [ { in: path, name: id, required: true, schema: { type: string, format: uuid } } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ReceivePayload' }}}}
+      responses: { '200': { description: Received } }
+components:
+  schemas:
+    Transfer:
+      type: object
+      required: [id,lotId,fromActorId,toActorId,status,quantityShipped]
+      properties:
+        id: { type: string, format: uuid }
+        lotId: { type: string, format: uuid }
+        fromActorId: { type: string, format: uuid }
+        toActorId: { type: string, format: uuid }
+        status: { type: string, enum: [CREATED,SHIPPED,RECEIVED,CANCELLED] }
+        quantityShipped: { type: number, minimum: 0 }
+        quantityReceived: { type: number, minimum: 0 }
+    TransferCreate:
+      type: object
+      required: [lotId,fromActorId,toActorId,quantityShipped]
+      properties:
+        lotId: { type: string, format: uuid }
+        fromActorId: { type: string, format: uuid }
+        toActorId: { type: string, format: uuid }
+        quantityShipped: { type: number, minimum: 0 }
+    ReceivePayload:
+      type: object
+      required: [quantityReceived]
+      properties:
+        quantityReceived: { type: number, minimum: 0 }
+    TransferPage:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Transfer' } }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
