@@ -1,23 +1,84 @@
 openapi: 3.0.3
-info: { title: Transfer API, version: 0.2.0 }
+info: 
+  title: Transfer API
+  version: 0.2.0 
+  license:
+    name: Confidential
+    url: https://yourdomain.com/license
 servers: [ { url: /transfer } ]
+security:
+  - bearerAuth: []
 paths:
   /transfers:
     post:
+      operationId: createTransfer
+      summary: Create a new transfer record
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/TransferCreate' }}}}
-      responses: { '201': { description: Created } }
+      responses: 
+        '201': { description: Created } 
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '409':
+          description: Duplicate or conflicting transfer
     get:
-      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TransferPage' }}}}}
+      operationId: listTransfers
+      summary: Retrieve a paginated list of transfers
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TransferPage' }}}}
+        '400':
+          description: Invalid query parameters
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: No transfers found
   /transfers/{id}/ship:
     post:
-      parameters: [ { in: path, name: id, required: true, schema: { type: string, format: uuid } } ]
-      responses: { '200': { description: Shipped } }
+      operationId: markTransferAsShipped
+      summary: Mark a transfer as shipped
+      parameters:  
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid } 
+      responses: 
+        '200': { description: Shipped } 
+        '400':
+          description: Invalid transfer ID
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: Transfer not found
   /transfers/{id}/receive:
     post:
-      parameters: [ { in: path, name: id, required: true, schema: { type: string, format: uuid } } ]
+      operationId: markTransferAsReceived
+      summary: Mark a transfer as received by the destination actor
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid } 
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ReceivePayload' }}}}
-      responses: { '200': { description: Received } }
+      responses: 
+        '200': { description: Received } 
+        '400':
+          description: Invalid request payload or transfer state
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: Transfer not found
 components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   schemas:
     Transfer:
       type: object

@@ -1,33 +1,48 @@
 openapi: 3.0.3
-info: { title: Consumer Trace API, version: 0.1.0 }
-servers: [ { url: /consumer } ]
+info: 
+  title: Consumer Trace API
+  version: 0.1.0 
+  license:
+    name: Confidential
+    url: https://yourdomain.com/license
+servers:
+  - url: /consumer
+security:
+  - bearerAuth: []
 paths:
   /trace/{lotId}:
     get:
+      operationId: getTraceByLotId
+      summary: Retrieve full traceability data for a given lot
       parameters: [ { in: path, name: lotId, required: true, schema: { type: string } } ]
       responses:
         '200':
           description: Trace Data Returned
           content: { application/json: { schema: { $ref: '#/components/schemas/Trace' }}}
+        '404':
+          description: Lot not found
+        '401':
+          description: Unauthorized request
 components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   schemas:
     Trace:
       type: object
-      required: [lot, chain]
+      required: [lotId, transfers]
       properties:
         lotId: { type: string}
         species: { type: string}
-        origin: { type: object, properties: {region: {type: string}, gps: {type: array, items: {type: numbers}}}
-        weightKg: {type: numbers}
+        origin: { type: object, properties: {region: {type: string}, gps: {type: array, items: {type: number}}}}
+        weightKg: {type: number}
         certifications: {type: array, items: { type: string}}
         transfers: 
-          type: array, 
+          type: array
           items: 
-            type: object, 
+            type: object
             properties: 
-              step: {type, string}
+              step: {type: string}
               fromActor: {type: string}
               toActor: {type: string} 
               whenAt: {type: string, format: date-time}
               docUri: {type: string}
-

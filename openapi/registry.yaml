@@ -1,27 +1,67 @@
 openapi: 3.0.3
-info: { title: Registry API, version: 0.2.0 }
+info: 
+  title: Registry API
+  version: 0.2.0 
+  license:
+    name: Confidential
+    url: https://yourdomain.com/license
 servers: [ { url: /registry } ]
+security:
+  - bearerAuth: []
 paths:
   /actors:
     get:
+      operationId: listActors
       summary: List actors
       parameters:
-        - in: query; name: type; schema: { type: string, enum: [HARVESTER,FPO,PROCESSOR,WAREHOUSE,EXPORTER,RETAILER] }
-        - in: query; name: region; schema: { type: string }
-        - in: query; name: page; schema: { type: integer, minimum: 0, default: 0 }
-        - in: query; name: size; schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
-      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ActorPage' }}}}}
+        - in: query
+          name: type 
+          schema: { type: string, enum: [HARVESTER,FPO,PROCESSOR,WAREHOUSE,EXPORTER,RETAILER] }
+        - in: query
+          name: region 
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: size
+          schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+      responses: 
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ActorPage' }}}}
+        '400':
+          description: Invalid query parameters
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: No actors found
+
     post:
-      summary: Create actor
+      operationId: createActor
+      summary: Create a new actor record
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ActorCreate' }}}}
-      responses: { '201': { description: Created, headers: { Location: { schema: { type: string }}}} }
+      responses: 
+        '201': { description: Created, headers: { Location: { schema: { type: string }}}} 
+        '400':
+          description: Invalid request body or missing required fields
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '409':
+          description: Actor already exists
   /actors/{id}:
     get:
+      operationId: getActorById
+      summary: Retrieve an actor by unique ID
       parameters: [ { in: path, name: id, required: true, schema: { type: string, format: uuid } } ]
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Actor' }}}}
         '404': { description: Not Found }
 components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   schemas:
     Actor:
       type: object

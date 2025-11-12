@@ -1,23 +1,29 @@
 openapi: 3.0.3
-info: { title: Identity API, version: 0.1.0 }
+info: 
+  title: Identity API 
+  version: 0.1.0 
+  license:
+    name: Confidential
+    url: https://yourdomain.com/license
 servers: [ { url: /identity } ]
+security:
+  - bearerAuth: []
 paths:
   /auth/login:
     post:
+      operationId: loginUser
       summary: Exchange username/password for JWT access token (keyclock proxy)
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Login' }}}}
       responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Jwt' }}}}, '401':{ description: Invalid credentials}}
   /auth/me:
     get:
+      operationId: getCurrentActorProfile
       summary: Get actor profile for current authenticated user
-      security: 
-        - bearerAuth: []
-      responses: {'200': {description: Actor profile returned, content: {application/json: {schema: {$ref: '#/components/schemas/ActorProfile'}}}}}
+      responses: {'200': {description: Actor profile returned, content: {application/json: {schema: {$ref: '#/components/schemas/ActorProfile'}}}}, '404': { description: Actor not found}}
   /auth/actors/{actorId}:
     get:
+      operationId: getActorProfileById
       summary: Get actor profile by actorId
-      secirity:
-        - bearerAuth: []
       parameters:
         - name: actorId
           in: path

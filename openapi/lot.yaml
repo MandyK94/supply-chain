@@ -1,14 +1,41 @@
 openapi: 3.0.3
-info: { title: Lot API, version: 0.2.0 }
+info: 
+  title: Lot API
+  version: 0.2.0 
+  license:
+    name: Confidential
+    url: https://yourdomain.com/license
 servers: [ { url: /lot } ]
+security:
+  - bearerAuth: []
 paths:
   /lots:
     get:
-      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/LotPage' }}}}}
+      operationId: getAllLots
+      summary: Retrieve all lots with pagination
+      responses: 
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/LotPage' }}}}
+        '400':
+          description: Invalid query parameters
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: No lots found
     post:
+      operationId: createLot
+      summary: Create a new lot record
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LotCreate' }}}}
-      responses: { '201': { description: Created } }
+      responses: 
+        '201': { description: Created } 
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized request
 components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   schemas:
     Lot:
       type: object
