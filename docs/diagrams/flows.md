@@ -1,3 +1,47 @@
+# Wyldtrace Supply Chain Diagrams
+
+## 1. Context Diagram
+
+```mermaid
+flowchart LR
+  subgraph Harvest
+    H1[Harvester / FPO] -->|Harvest Data| GW[Gateway Service]
+  end
+
+  subgraph Processing
+    P1[Processor / Warehouse] -->|Batch Update| GW
+  end
+
+  subgraph Trade
+    E1[Exporter / Brand] -->|Shipment Update| GW
+  end
+
+  subgraph Registry Layer
+    GW --> RS[Registry Service]
+    RS --> BC[(Hyperledger Network)]
+    RS --> DB[(PostgreSQL Off-chain DB)]
+  end
+
+  subgraph Identity
+    U[User / Admin] --> IS[Identity Service]
+    IS --> RS
+  end
+
+  subgraph Consumer
+    QR[Consumer Scan (QR Code)] --> CA[Consumer API]
+    CA --> RS
+  end
+
+  RS --> AN[Analytics Service]
+  AN --> GF[Grafana / Monitoring]
+
+  style BC fill:#c2e0ff,stroke:#0077cc,stroke-width:2px
+  style RS fill:#ffefa0,stroke:#b59f00
+  style GW fill:#ffe0b3,stroke:#b57900
+  style CA fill:#d2ffcc,stroke:#009933
+
+
+
 sequenceDiagram
   participant Staff as Staff UI
   participant Gateway
